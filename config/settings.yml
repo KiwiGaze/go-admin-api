@@ -1,0 +1,50 @@
+settings:
+  application:
+    # dev development environment, test testing environment, prod production environment
+    mode: dev
+    # Server IP, defaults to 0.0.0.0
+    host: 0.0.0.0
+    # Service name
+    name: go-admin-api
+    # Port number
+    port: 8000 # Service port number
+    readtimeout: 1
+    writertimeout: 2
+    # Data permission feature toggle
+    enabledp: false
+  logger:
+    # Log storage path
+    path: temp/logs
+    # Log output, file: file, default: command line, others: command line
+    stdout: '' # Console log; when enabled, logs are not written to files
+    # Log level, trace, debug, info, warn, error, fatal
+    level: trace
+    # Database log toggle
+    enableddb: false
+  jwt:
+    # Token secret; remember to change this in production
+    secret: go-admin-api
+    # Token expiration time in seconds
+    timeout: 3600
+  database:
+    # Database type: mysql, sqlite3, postgres, sqlserver
+    # sqlserver: sqlserver://username:password@address?database=database_name
+    driver: mysql
+    # Database connection string; mysql default params: charset=utf8&parseTime=True&loc=Local&timeout=1000ms
+    source: mac:12345678@tcp(127.0.0.1:3306)/dbname?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
+
+  gen:
+    # Database name used by code generation
+    dbname: dbname
+    # Frontend code path used by code generation; must point to the src folder using a relative path
+    frontpath: ../go-admin-web/src
+  extend: # Extension usage notes
+    demo:
+      name: data
+  cache:
+    memory: '' 
+  queue:
+    memory:
+      poolSize: 100
+  locker:
+    redis:
