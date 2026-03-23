@@ -8,6 +8,13 @@ require (
 	github.com/go-admin-team/go-admin-core v1.5.3-rc.4
 	github.com/go-admin-team/go-admin-core/sdk v1.5.3-rc.4
 	github.com/spf13/cobra v1.9.1
+	gorm.io/driver/sqlite v1.6.0
+)
+
+require (
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 )
 
 require (
@@ -18,7 +25,7 @@ require (
 	github.com/andeya/goutil v1.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
-	github.com/bytedance/go-tagexpr/v2 v2.9.11 // indirect
+	github.com/bytedance/go-tagexpr/v2 v2.9.11
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/casbin/gorm-adapter/v3 v3.32.0 // indirect
@@ -64,7 +71,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
@@ -80,13 +86,12 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.6.0 // indirect
-	gorm.io/driver/postgres v1.6.0 // indirect
-	gorm.io/driver/sqlserver v1.6.3 // indirect
-	gorm.io/gorm v1.31.1 // indirect
+	gorm.io/driver/mysql v1.6.0
+	gorm.io/driver/postgres v1.6.0
+	gorm.io/driver/sqlserver v1.6.3
+	gorm.io/gorm v1.31.1
 	gorm.io/plugin/dbresolver v1.6.2 // indirect
 	modernc.org/libc v1.62.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
