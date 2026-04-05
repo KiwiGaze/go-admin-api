@@ -143,6 +143,90 @@ func TestMilestoneDemo(t *testing.T) {
 
 		assertJWTRejection(t, recorder, "token is malformed")
 	})
+
+	t.Run("login rejects bad credentials", func(t *testing.T) {
+		app := newMilestoneDemoApp(t)
+
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBufferString(
+			`{"username":"demo","password":"wrong-password","code":"1234","uuid":"captcha-1"}`,
+		))
+		request.Header.Set("Content-Type", "application/json")
+
+		app.router.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("expected HTTP 200 envelope, got %d", recorder.Code)
+		}
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatalf("decode login rejection response: %v", err)
+		}
+		if response.Code != http.StatusBadRequest {
+			t.Fatalf("expected code 400, got %d (body: %s)", response.Code, recorder.Body.String())
+		}
+	})
+
+	t.Run("role enforcement denies unauthorized role", func(t *testing.T) {
+		app := newMilestoneDemoApp(t)
+
+		db := sdk.Runtime.GetDbByTenant("*")
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(testPassword), bcrypt.DefaultCost)
+		if err != nil {
+			t.Fatalf("hash password: %v", err)
+		}
+
+		viewerRole := handler.SysRole{RoleKey: "viewer", RoleName: "Viewer", Status: "2"}
+		if err := db.Create(&viewerRole).Error; err != nil {
+			t.Fatalf("insert viewer role: %v", err)
+		}
+		viewerUser := handler.SysUser{
+			Username: "viewer",
+			Password: string(hashedPassword),
+			NickName: "Viewer User",
+			RoleId:   viewerRole.RoleId,
+			Status:   "2",
+		}
+		if err := db.Create(&viewerUser).Error; err != nil {
+			t.Fatalf("insert viewer user: %v", err)
+		}
+
+		loginRecorder := httptest.NewRecorder()
+		loginRequest := httptest.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBufferString(
+			`{"username":"viewer","password":"`+testPassword+`","code":"1234","uuid":"captcha-1"}`,
+		))
+		loginRequest.Header.Set("Content-Type", "application/json")
+		app.router.ServeHTTP(loginRecorder, loginRequest)
+
+		var loginResponse struct {
+			Code  int    `json:"code"`
+			Token string `json:"token"`
+		}
+		if err := json.Unmarshal(loginRecorder.Body.Bytes(), &loginResponse); err != nil {
+			t.Fatalf("decode viewer login: %v", err)
+		}
+		if loginResponse.Token == "" {
+			t.Fatalf("expected viewer token, body: %s", loginRecorder.Body.String())
+		}
+
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, "/api/v1/protected", nil)
+		request.Header.Set("Authorization", "Bearer "+loginResponse.Token)
+		app.router.ServeHTTP(recorder, request)
+
+		var response struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatalf("decode role enforcement response: %v", err)
+		}
+		if response.Code != http.StatusForbidden {
+			t.Fatalf("expected 403, got %d (body: %s)", response.Code, recorder.Body.String())
+		}
+	})
 }
 
 type milestoneDemoApp struct {
