@@ -21,7 +21,7 @@ import (
 	"go-admin-api/app/admin/models"
 	"go-admin-api/app/admin/router"
 
-	//"go-admin-api/app/jobs"
+	"go-admin-api/app/jobs"
 	"go-admin-api/common/database"
 	"go-admin-api/common/global"
 	common "go-admin-api/common/middleware"
@@ -87,16 +87,15 @@ func run() error {
 	}
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", config.ApplicationConfig.Host, config.ApplicationConfig.Port),
-		Handler: sdk.Runtime.GetEngine(),
+		Addr:         fmt.Sprintf("%s:%d", config.ApplicationConfig.Host, config.ApplicationConfig.Port),
+		Handler:      sdk.Runtime.GetEngine(),
 		ReadTimeout:  time.Duration(config.ApplicationConfig.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(config.ApplicationConfig.WriterTimeout) * time.Second,
 	}
 
 	go func() {
-		// ToDo: Implement after the job module is ready
-		//jobs.InitJob()
-		//jobs.Setup(sdk.Runtime.GetDb())
+		jobs.InitJob()
+		jobs.Setup(sdk.Runtime.GetAllDb())
 
 	}()
 
@@ -105,7 +104,7 @@ func run() error {
 		q := sdk.Runtime.GetMemoryQueue("")
 		mp := make(map[string]interface{})
 		mp["List"] = routers
-			message, err := sdk.Runtime.GetStreamMessage("", global.ApiCheck, mp)
+		message, err := sdk.Runtime.GetStreamMessage("", global.ApiCheck, mp)
 		if err != nil {
 			log.Infof("GetStreamMessage error, %s \n", err.Error())
 			// Log the error, but do not interrupt the request.
