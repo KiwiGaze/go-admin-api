@@ -34,5 +34,5 @@ func InitMiddleware(r *gin.Engine) {
 	//r.Use(middleware.Trace())
 	sdk.Runtime.SetMiddleware(JwtTokenCheck, (*jwt.GinJWTMiddleware).MiddlewareFunc)
 	sdk.Runtime.SetMiddleware(RoleCheck, AuthCheckRole())
-	sdk.Runtime.SetMiddleware(PermissionCheck, actions.PermissionActions())
+	sdk.Runtime.SetMiddleware(PermissionCheck, actions.PermissionAction())
 }

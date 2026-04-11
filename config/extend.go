@@ -1,6 +1,6 @@
 package config
 
-var ExtendConfig Extend
+var ExtConfig Extend
 
 type Extend struct {
 	AMap AMap

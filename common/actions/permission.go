@@ -27,7 +27,7 @@ type DataPermission struct {
 	RoleId    int
 }
 
-func PermissionActions() gin.HandlerFunc {
+func PermissionAction() gin.HandlerFunc {
 	return func (c *gin.Context) {
 		log := api.GetRequestLogger(c)
 		db, err := pkg.GetOrm(c)
