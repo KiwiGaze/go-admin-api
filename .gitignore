@@ -32,3 +32,11 @@ config/*.local.yml
 .vscode/
 *.swp
 *.swo
+
+# docs for agents
+.claude/
+.codex/
+.github/prompts/
+.github/skills
+.opencode/
+.qwen
