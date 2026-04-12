@@ -12,12 +12,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-admin-team/go-admin-core/sdk"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/config"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 
 	"go-admin-api/common/global"
+	localsdk "go-admin-api/sdk"
 )
 
 // LoggerToFile 日志记录到文件
@@ -121,8 +121,8 @@ func SetDBOperLog(c *gin.Context, clientIP string, statusCode int, reqUri string
 	l["userAgent"] = c.Request.UserAgent()
 	l["createBy"] = user.GetUserId(c)
 	l["updateBy"] = user.GetUserId(c)
-	q := sdk.Runtime.GetMemoryQueue(c.Request.Host)
-	message, err := sdk.Runtime.GetStreamMessage("", global.OperateLog, l)
+	q := localsdk.Runtime.GetMemoryQueue(c.Request.Host)
+	message, err := localsdk.Runtime.GetStreamMessage("", global.OperateLog, l)
 	if err != nil {
 		log.Errorf("GetStreamMessage error, %s", err.Error())
 		// 日志报错错误，不中断请求

@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-admin-team/go-admin-core/config/source/file"
 	log "github.com/go-admin-team/go-admin-core/logger"
-	"github.com/go-admin-team/go-admin-core/sdk"
+	coresdk "github.com/go-admin-team/go-admin-core/sdk"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/config"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
@@ -25,8 +25,10 @@ import (
 	"go-admin-api/common/database"
 	"go-admin-api/common/global"
 	common "go-admin-api/common/middleware"
-	"go-admin-api/common/storage"
+	appstorage "go-admin-api/common/storage"
 	ext "go-admin-api/config"
+	localsdk "go-admin-api/sdk"
+	localstorage "go-admin-api/storage"
 )
 
 var (
@@ -63,13 +65,19 @@ func setup() {
 	config.Setup(
 		file.NewSource(file.WithPath(configYml)),
 		database.Setup,
-		storage.Setup,
+		appstorage.Setup,
 	)
 	// Register listeners.
-	queue := sdk.Runtime.GetMemoryQueue("")
-	queue.Register(global.LoginLog, models.SaveLoginLog)
-	queue.Register(global.OperateLog, models.SaveOperaLog)
-	queue.Register(global.ApiCheck, models.SaveSysApi)
+	queue := localsdk.Runtime.GetMemoryQueue("")
+	queue.Register(global.LoginLog, func(message localstorage.Messager) error {
+		return models.SaveLoginLog(message)
+	})
+	queue.Register(global.OperateLog, func(message localstorage.Messager) error {
+		return models.SaveOperaLog(message)
+	})
+	queue.Register(global.ApiCheck, func(message localstorage.Messager) error {
+		return models.SaveSysApi(message)
+	})
 	go queue.Run()
 
 	usageStr := `starting api server...`
@@ -88,23 +96,23 @@ func run() error {
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", config.ApplicationConfig.Host, config.ApplicationConfig.Port),
-		Handler:      sdk.Runtime.GetEngine(),
+		Handler:      coresdk.Runtime.GetEngine(),
 		ReadTimeout:  time.Duration(config.ApplicationConfig.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(config.ApplicationConfig.WriterTimeout) * time.Second,
 	}
 
 	go func() {
 		jobs.InitJob()
-		jobs.Setup(sdk.Runtime.GetAllDb())
+		jobs.Setup(coresdk.Runtime.GetAllDb())
 
 	}()
 
 	if apiCheck {
-		var routers = sdk.Runtime.GetRouter()
-		q := sdk.Runtime.GetMemoryQueue("")
+		var routers = coresdk.Runtime.GetRouter()
+		q := localsdk.Runtime.GetMemoryQueue("")
 		mp := make(map[string]interface{})
 		mp["List"] = routers
-		message, err := sdk.Runtime.GetStreamMessage("", global.ApiCheck, mp)
+		message, err := localsdk.Runtime.GetStreamMessage("", global.ApiCheck, mp)
 		if err != nil {
 			log.Infof("GetStreamMessage error, %s \n", err.Error())
 			// Log the error, but do not interrupt the request.
@@ -163,10 +171,10 @@ func tip() {
 
 func initRouter() {
 	var r *gin.Engine
-	h := sdk.Runtime.GetEngine()
+	h := coresdk.Runtime.GetEngine()
 	if h == nil {
 		h = gin.New()
-		sdk.Runtime.SetEngine(h)
+		coresdk.Runtime.SetEngine(h)
 	}
 	switch engine := h.(type) {
 	case *gin.Engine:

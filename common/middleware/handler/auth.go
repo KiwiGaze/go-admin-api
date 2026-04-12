@@ -8,7 +8,6 @@ import (
 	"go-admin-api/common/global"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-admin-team/go-admin-core/sdk"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/config"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
@@ -17,6 +16,8 @@ import (
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/response"
 	"github.com/mssola/user_agent"
+
+	localsdk "go-admin-api/sdk"
 )
 
 func PayloadFunc(data interface{}) jwt.MapClaims {
@@ -127,8 +128,8 @@ func LoginLogToDB(c *gin.Context, status string, msg string, username string) {
 	l["username"] = username
 	l["msg"] = msg
 
-	q := sdk.Runtime.GetMemoryQueue(c.Request.Host)
-	message, err := sdk.Runtime.GetStreamMessage("", global.LoginLog, l)
+	q := localsdk.Runtime.GetMemoryQueue(c.Request.Host)
+	message, err := localsdk.Runtime.GetStreamMessage("", global.LoginLog, l)
 	if err != nil {
 		log.Errorf("GetStreamMessage error, %s", err.Error())
 		// log error without interrupting the request
